@@ -36,12 +36,12 @@ const createFieldValidation = (field: FormField): z.ZodTypeAny => {
       baseSchema = z.string().email(validations.customMessage || 'Invalid email address');
       break;
     case 'number': {
-      let schema = z.number();
+      let schema = z.coerce.number();
       if (validations.min !== undefined) {
-        schema = schema.min(validations.min, validations.customMessage || `Must be at least ${validations.min}`);
+        schema = schema.gte(validations.min, validations.customMessage || `Must be at least ${validations.min}`);
       }
       if (validations.max !== undefined) {
-        schema = schema.max(validations.max, validations.customMessage || `Must be at most ${validations.max}`);
+        schema = schema.lte(validations.max, validations.customMessage || `Must be at most ${validations.max}`);
       }
       baseSchema = schema;
       break;

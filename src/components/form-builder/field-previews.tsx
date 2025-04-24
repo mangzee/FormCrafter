@@ -65,6 +65,29 @@ export const getFormFieldPreview = (field: FormField) => {
         </div>
       );
 
+    case 'multiSelect':
+      return (
+        <div className="space-y-2">
+          <Label>{label}</Label>
+          <Select disabled>
+            <SelectTrigger>
+              <SelectValue placeholder={`Select multiple ${label.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map(option => (
+                <SelectItem 
+                  key={option.id} 
+                  value={option.value}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">Multiple selections allowed</p>
+        </div>
+      );
+
     case 'radio':
       return (
         <div className="space-y-2">
@@ -187,7 +210,9 @@ export const getFormFieldPreview = (field: FormField) => {
                     </td>
                     {columns.map(col => (
                       <td key={col.id} className="py-2 px-3 text-center">
-                        <RadioGroupItem disabled value="" className="opacity-50" />
+                        <RadioGroup disabled defaultValue={col.value}>
+                          <RadioGroupItem value={col.value} />
+                        </RadioGroup>
                       </td>
                     ))}
                   </tr>

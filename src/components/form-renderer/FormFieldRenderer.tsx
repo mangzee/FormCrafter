@@ -147,6 +147,46 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             )}
           />
         );
+
+      case 'multiSelect':
+        return (
+          <Controller
+            name={field.id}
+            control={control}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
+                  {field.label}
+                </FormLabel>
+                <div className="space-y-2">
+                  {field.options?.map((option) => (
+                    <div className="flex items-center space-x-2" key={option.id}>
+                      <Checkbox
+                        id={option.id}
+                        checked={(formField.value || []).includes(option.value)}
+                        onCheckedChange={(checked) => {
+                          const currentValues = [...(formField.value || [])];
+                          if (checked) {
+                            if (!currentValues.includes(option.value)) {
+                              formField.onChange([...currentValues, option.value]);
+                            }
+                          } else {
+                            formField.onChange(
+                              currentValues.filter((value) => value !== option.value)
+                            );
+                          }
+                        }}
+                      />
+                      <Label htmlFor={option.id}>{option.label}</Label>
+                    </div>
+                  ))}
+                </div>
+                {field.helpText && <FormDescription>{field.helpText}</FormDescription>}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
         
       case 'radio':
         return (
