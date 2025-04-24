@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { PlusCircle, Trash } from 'lucide-react';
+import { PlusCircle, Trash, Image as ImageIcon, Paperclip, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -306,6 +306,8 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
         );
         
       case 'file':
+      case 'image':
+      case 'attachment':
         return (
           <Controller
             name={field.id}
@@ -316,14 +318,135 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
                   {field.label}
                 </FormLabel>
                 <FormControl>
-                  <div className="grid w-full items-center gap-1.5">
-                    <Input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        formField.onChange(file);
-                      }}
-                    />
+                  <div className="space-y-4">
+                    <div className="border-2 border-dashed rounded-md p-6 text-center">
+                      {fieldType === 'image' && (
+                        <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground/60" />
+                      )}
+                      {fieldType === 'attachment' && (
+                        <Paperclip className="h-8 w-8 mx-auto mb-2 text-muted-foreground/60" />
+                      )}
+                      <Input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (fieldType === 'attachment') {
+                            formField.onChange(Array.from(files || []));
+                          } else {
+                            const file = files?.[0] || null;
+                            formField.onChange(file);
+                            
+                            // Create preview URL for images
+                            if (file && fieldType === 'image') {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                if (typeof reader.result === 'string') {
+                                  formField.onChange({ file, preview: reader.result });
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }
+                        }}
+                        multiple={fieldType === 'attachment'}
+                        accept={fieldType === 'image' ? 'image/*' : undefined}
+                        id={`file-upload-${field.id}`}
+                      />
+                      <label
+                        htmlFor={`file-upload-${field.id}`}
+                        className="cursor-pointer"
+                      >
+                        <div className="text-sm">
+                          {fieldType === 'image' ? (
+                            <>Drop image here or click to upload</>
+                          ) : fieldType === 'attachment' ? (
+                            <>Drop files here or click to upload</>
+                          ) : (
+                            <>Drop file here or click to upload</>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {fieldType === 'image' ? (
+                            <>Supported formats: JPG, PNG, GIF</>
+                          ) : (
+                            <>Maximum file size: {field.validations?.maxFileSize || '5MB'}</>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Preview section */}
+                    {formField.value && (
+                      <div className="space-y-2">
+                        {fieldType === 'image' && formField.value.preview && (
+                          <div className="relative w-40 h-40 mx-auto">
+                            <img
+                              src={formField.value.preview}
+                              alt="Preview"
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6"
+                              onClick={() => formField.onChange(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {fieldType === 'attachment' && Array.isArray(formField.value) && (
+                          <div className="space-y-2">
+                            {formField.value.map((file: File, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 bg-muted rounded-md"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <Paperclip className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm truncate max-w-[200px]">
+                                    {file.name}
+                                  </span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-destructive"
+                                  onClick={() => {
+                                    const newFiles = [...formField.value];
+                                    newFiles.splice(index, 1);
+                                    formField.onChange(newFiles);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {fieldType === 'file' && formField.value && (
+                          <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+                            <div className="flex items-center space-x-2">
+                              <Paperclip className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm truncate max-w-[200px]">
+                                {formField.value.name}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive"
+                              onClick={() => formField.onChange(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </FormControl>
                 {field.helpText && <FormDescription>{field.helpText}</FormDescription>}
