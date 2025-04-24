@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FormSchema, Condition, FormField, ConditionalOperator } from '@/lib/types';
-import { z } from 'zod';
+import { FormSchema, FormField, ConditionalOperator } from '@/lib/types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { generateValidationSchema } from '@/lib/validation';

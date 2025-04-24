@@ -1,6 +1,15 @@
-# FormCrafter - Form Builder Library
+# FormCrafter
+
+[![npm version](https://img.shields.io/npm/v/formcrafter.svg)](https://www.npmjs.com/package/formcrafter)
+[![npm downloads](https://img.shields.io/npm/dm/formcrafter.svg)](https://www.npmjs.com/package/formcrafter)
+[![License](https://img.shields.io/npm/l/formcrafter.svg)](https://github.com/mangzee/FormCrafter/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/mangzee/FormCrafter.svg)](https://github.com/mangzee/FormCrafter/stargazers)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/mangzee/FormCrafter/pulls)
 
 A powerful and flexible form builder and renderer library built with React, TypeScript, and Tailwind CSS. Create dynamic forms with advanced features like conditional logic, validation, and repeatable sections.
+
+[View Demo](https://idyllic-puffpuff-98b974.netlify.app/)
 
 ## Features
 
@@ -12,78 +21,67 @@ A powerful and flexible form builder and renderer library built with React, Type
 - ✅ Built-in validation with Zod
 - 📱 Mobile-friendly and accessible
 - 🎯 Comprehensive field customization options
+- 🌙 Dark mode support out of the box
+- 🎭 Customizable themes
+- 🔒 Type-safe with full TypeScript support
+- 📦 Zero configuration required
 
-## Field Types
+## Installation
 
-### Basic Fields
-- **Text**: Single-line text input
-- **Long Text**: Multi-line text area
-- **Number**: Numeric input with validation
-- **Email**: Email input with format validation
+```bash
+npm install formcrafter
+```
 
-### Choice Fields
-- **Dropdown**: Single-select dropdown menu
-- **Multi-Select**: Multiple selection dropdown
-- **Checkboxes**: Multiple choice checkboxes
-- **Radio**: Single-select radio buttons
-
-### File Upload Fields
-- **File Upload**: Single file upload
-- **Image Upload**: Image upload with preview
-- **Attachments**: Multiple file attachments
-
-### Advanced Fields
-- **Rating**: Star rating or numeric scale
-- **Matrix**: Grid of questions and answers
-- **Repeatable**: Dynamic repeatable sections with sub-fields
-
-## Form Builder Features
-
-### Field Properties
-- Label customization
-- Help text
-- Placeholder text
-- Required field toggle
-- Field-specific validation rules
-- Conditional display logic
-
-### Validation Options
-- Min/max length for text
-- Min/max value for numbers
-- Required field validation
-- Email format validation
-- File type restrictions
-- Custom validation messages
-
-### Conditional Logic
-Configure fields to show/hide based on:
-- Other field values
-- Multiple conditions
-- Complex logic operators
-
-## Usage Example
+## Quick Start
 
 ```tsx
-import { FormBuilder, FormRenderer } from '@/components/form-builder';
+import { FormBuilder, FormRenderer, FormBuilderProvider, ThemeProvider } from 'formcrafter';
 
-// Form Builder Component
-function FormBuilderExample() {
+function App() {
   const handleSubmit = (data: Record<string, any>) => {
     console.log('Form submitted:', data);
   };
 
   return (
-    <div className="container mx-auto">
-      <FormBuilder />
-      <FormRenderer onSubmit={handleSubmit} />
-    </div>
+    <ThemeProvider defaultTheme="light" storageKey="theme">
+      <FormBuilderProvider>
+        <div className="container mx-auto">
+          <FormBuilder />
+          <FormRenderer onSubmit={handleSubmit} />
+        </div>
+      </FormBuilderProvider>
+    </ThemeProvider>
   );
 }
 ```
 
+## Field Types
+
+### Basic Fields
+- **Text**: Single-line text input with optional validation
+- **Long Text**: Multi-line text area with resizable input
+- **Number**: Numeric input with min/max validation
+- **Email**: Email input with format validation
+
+### Choice Fields
+- **Dropdown**: Single-select dropdown menu with search
+- **Multi-Select**: Multiple selection dropdown with tags
+- **Checkboxes**: Multiple choice checkboxes with min/max selections
+- **Radio**: Single-select radio buttons with custom styling
+
+### File Upload Fields
+- **File Upload**: Single file upload with type restrictions
+- **Image Upload**: Image upload with preview and size limits
+- **Attachments**: Multiple file attachments with drag-and-drop
+
+### Advanced Fields
+- **Rating**: Star rating or numeric scale (1-5)
+- **Matrix**: Grid of questions and answers for surveys
+- **Repeatable**: Dynamic repeatable sections with sub-fields
+
 ## Form Schema
 
-The form schema is a JSON structure that defines the form's fields and properties:
+The form schema defines the structure and behavior of your form:
 
 ```typescript
 interface FormSchema {
@@ -109,66 +107,143 @@ interface FormField {
   conditions?: Condition[];
   subFields?: FormField[]; // For repeatable sections
 }
+
+interface FieldValidation {
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  customMessage?: string;
+  allowedFileTypes?: string[];
+  maxFileSize?: number;
+  maxFiles?: number;
+}
 ```
 
 ## Validation
 
-The library uses Zod for form validation. Each field type has its own validation rules:
+Built-in validation using Zod with support for:
 
 ```typescript
-// Example validation schema for a text field
-const textFieldValidation = z.string()
-  .min(3, "Must be at least 3 characters")
-  .max(100, "Must be less than 100 characters");
+// Text field validation
+const textValidation = {
+  minLength: 3,
+  maxLength: 100,
+  pattern: '^[A-Za-z0-9]+$',
+  customMessage: 'Please enter alphanumeric characters only'
+};
 
-// Example validation for a number field
-const numberFieldValidation = z.number()
-  .min(0, "Must be positive")
-  .max(100, "Must be less than 100");
+// Number field validation
+const numberValidation = {
+  min: 0,
+  max: 100,
+  customMessage: 'Please enter a number between 0 and 100'
+};
+
+// File upload validation
+const fileValidation = {
+  maxFileSize: 5000000, // 5MB
+  allowedFileTypes: ['.jpg', '.png', '.pdf'],
+  maxFiles: 3
+};
 ```
 
 ## Conditional Logic
 
-Fields can be shown or hidden based on other field values:
+Show or hide fields based on other field values:
 
 ```typescript
-interface Condition {
-  sourceFieldId: string;
-  operator: ConditionalOperator;
-  value: any;
-}
-
-type ConditionalOperator = 
-  | 'equals' 
-  | 'notEquals' 
-  | 'contains' 
-  | 'notContains'
-  | 'greaterThan'
-  | 'lessThan'
-  | 'isEmpty'
-  | 'isNotEmpty';
+const conditions = [
+  {
+    sourceFieldId: 'question1',
+    operator: 'equals',
+    value: 'yes'
+  },
+  {
+    sourceFieldId: 'age',
+    operator: 'greaterThan',
+    value: 18
+  }
+];
 ```
 
-## Repeatable Sections
+Supported operators:
+- `equals`
+- `notEquals`
+- `contains`
+- `notContains`
+- `greaterThan`
+- `lessThan`
+- `isEmpty`
+- `isNotEmpty`
 
-Create dynamic form sections that users can add multiple times:
+## Styling
+
+FormCrafter uses Tailwind CSS with a fully customizable theme:
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        // Add custom colors
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+    }
+  }
+};
+```
+
+## Advanced Usage
+
+### Custom Field Validation
 
 ```typescript
-const repeatableField: FormField = {
-  id: "contacts",
-  type: "repeatable",
-  label: "Contact Information",
+import { z } from 'zod';
+
+const customValidation = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+});
+```
+
+### Repeatable Sections
+
+Create dynamic form sections:
+
+```typescript
+const repeatableField = {
+  id: 'contacts',
+  type: 'repeatable',
+  label: 'Contact Information',
   subFields: [
     {
-      id: "name",
-      type: "text",
-      label: "Name",
+      id: 'name',
+      type: 'text',
+      label: 'Name',
       required: true
     },
     {
-      id: "email",
-      type: "email",
-      label: "Email",
+      id: 'email',
+      type: 'email',
+      label: 'Email',
       required: true
     }
   ],
@@ -179,108 +254,83 @@ const repeatableField: FormField = {
 };
 ```
 
-## Matrix Questions
+### Matrix Questions
 
-Create grid-based questions with rows and columns:
+Create grid-based survey questions:
 
 ```typescript
-const matrixField: FormField = {
-  id: "satisfaction",
-  type: "matrix",
-  label: "Satisfaction Survey",
+const matrixField = {
+  id: 'satisfaction',
+  type: 'matrix',
+  label: 'Satisfaction Survey',
   options: [
-    { id: "1", value: "row1", label: "Service Quality" },
-    { id: "2", value: "row2", label: "Response Time" },
-    { id: "3", value: "col1", label: "Poor", isColumn: true },
-    { id: "4", value: "col2", label: "Fair", isColumn: true },
-    { id: "5", value: "col3", label: "Good", isColumn: true }
+    { id: '1', value: 'row1', label: 'Service Quality' },
+    { id: '2', value: 'row2', label: 'Response Time' },
+    { id: '3', value: 'col1', label: 'Poor', isColumn: true },
+    { id: '4', value: 'col2', label: 'Fair', isColumn: true },
+    { id: '5', value: 'col3', label: 'Good', isColumn: true }
   ]
-};
-```
-
-## File Upload Fields
-
-Three types of file upload fields are available:
-
-1. **File Upload**: Single file upload with type restrictions
-2. **Image Upload**: Specialized for image files with preview
-3. **Attachments**: Multiple file uploads with count limits
-
-```typescript
-const imageField: FormField = {
-  id: "profile",
-  type: "image",
-  label: "Profile Picture",
-  validations: {
-    allowedFileTypes: [".jpg", ".png", ".gif"],
-    maxFileSize: 5000 // 5MB
-  }
-};
-
-const attachmentsField: FormField = {
-  id: "documents",
-  type: "attachment",
-  label: "Supporting Documents",
-  validations: {
-    maxFiles: 5,
-    allowedFileTypes: [".pdf", ".doc", ".docx"]
-  }
-};
-```
-
-## Styling
-
-The library uses Tailwind CSS with a customizable theme. Override the default styles by modifying the `tailwind.config.js`:
-
-```javascript
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        primary: {...},
-        secondary: {...},
-        // Add custom colors
-      },
-      borderRadius: {
-        // Customize border radius
-      },
-      // Add other theme customizations
-    }
-  }
 };
 ```
 
 ## Best Practices
 
-1. **Field Labels**
-   - Use clear, concise labels
-   - Add help text for complex fields
-   - Consider accessibility in your label text
+### Field Design
+- Use clear, descriptive labels
+- Add helpful placeholder text
+- Provide context with help text
+- Group related fields together
+- Use appropriate field types
 
-2. **Validation**
-   - Set appropriate validation rules
-   - Provide clear error messages
-   - Use custom validation messages when needed
+### Validation
+- Set reasonable validation rules
+- Provide clear error messages
+- Use custom validation for complex rules
+- Consider field dependencies
 
-3. **Conditional Logic**
-   - Keep conditions simple and logical
-   - Test all possible combinations
-   - Consider the user experience
+### Conditional Logic
+- Keep conditions simple
+- Test all combinations
+- Consider default states
+- Handle edge cases
 
-4. **File Uploads**
-   - Set appropriate file size limits
-   - Restrict file types as needed
-   - Consider server-side storage limits
+### Performance
+- Minimize number of conditions
+- Use appropriate field types
+- Optimize file upload settings
+- Test with large datasets
 
-5. **Repeatable Sections**
-   - Set reasonable min/max limits
-   - Keep sub-fields focused
-   - Consider data structure implications
+### Accessibility
+- Use semantic HTML
+- Provide ARIA labels
+- Ensure keyboard navigation
+- Test with screen readers
+
+## Browser Support
+
+FormCrafter supports all modern browsers:
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## Contributing
 
-Contributions are welcome! Please read our contributing guidelines and submit pull requests to our repository.
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+FormCrafter is [MIT licensed](./LICENSE).
+
+## Support
+
+- [GitHub Issues](https://github.com/mangzee/FormCrafter/issues)
+- [Documentation](https://github.com/mangzee/FormCrafter#readme)
+- [Demo](https://idyllic-puffpuff-98b974.netlify.app/)

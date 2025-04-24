@@ -1,8 +1,4 @@
-import { 
-  FormField as FormFieldType, 
-  FieldType,
-  FormField as IFormField,
-} from '@/lib/types';
+import { FormField as FormFieldType } from '@/lib/types';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -25,15 +21,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { PlusCircle, Trash } from 'lucide-react';
-import {
-  format,
-  isValid,
-  parse,
-} from 'date-fns';
+import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { generateId } from '@/lib/utils';
 
 interface FormFieldRendererProps {
   field: FormFieldType;
@@ -42,8 +33,8 @@ interface FormFieldRendererProps {
 
 const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
   const fieldType = field.type;
-  const { control, formState: { errors }, watch } = useFormContext();
-  
+  const { control } = useFormContext();
+
   const renderFieldByType = () => {
     switch (fieldType) {
       case 'text':
@@ -54,7 +45,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -78,7 +69,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -102,7 +93,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -130,7 +121,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <Select
@@ -164,7 +155,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem className="space-y-3">
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -195,7 +186,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <div className="space-y-2">
@@ -235,7 +226,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem className="flex flex-col">
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <Popover>
@@ -281,7 +272,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -309,7 +300,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -347,7 +338,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
             control={control}
             render={({ field: formField }) => (
               <FormItem>
-                <FormLabel required={field.required}>
+                <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                   {field.label}
                 </FormLabel>
                 <FormControl>
@@ -424,12 +415,12 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
 
               return (
                 <FormItem>
-                  <FormLabel required={field.required}>
+                  <FormLabel className={field.required ? 'after:content-["*"] after:ml-0.5 after:text-red-500' : ''}>
                     {field.label}
                   </FormLabel>
                   <FormControl>
                     <div className="space-y-4">
-                      {entries.map((entry: any, index: number) => (
+                      {entries.map((_: any, index: number) => (
                         <div 
                           key={index} 
                           className="p-4 border rounded-md relative bg-muted/10"
@@ -452,8 +443,7 @@ const FormFieldRenderer = ({ field, form }: FormFieldRendererProps) => {
                                 key={subField.id}
                                 name={`${field.id}.${index}.${subField.id}`}
                                 control={control}
-                                defaultValue={entry[subField.id]}
-                                render={({ field: subFormField }) => (
+                                render={() => (
                                   <FormFieldRenderer
                                     field={subField}
                                     form={form}

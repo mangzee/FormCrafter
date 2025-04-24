@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <FormBuilderProvider>
         <div className="min-h-screen bg-background">
           <FormBuilderDemo />

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
-import { FormField, FieldType } from '@/lib/types';
+import { FieldType } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

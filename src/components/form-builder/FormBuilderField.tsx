@@ -43,15 +43,15 @@ const FormBuilderField = ({
     zIndex: isDragging ? 2 : 1,
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = () => {
     if (isSelected) {
       return;
     }
     onClick();
   };
 
-  const handleBackgroundClick = (e: React.MouseEvent) => {
-    if (isSelected && !e.defaultPrevented) {
+  const handleBackgroundClick = () => {
+    if (isSelected) {
       onDeselect();
     }
   };

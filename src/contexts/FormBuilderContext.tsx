@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
-import { FormSchema, FormField, FieldType } from '@/lib/types';
+import { FormSchema, FormField } from '@/lib/types';
 
 // Initial state
 const initialFormSchema: FormSchema = {

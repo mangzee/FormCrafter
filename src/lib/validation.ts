@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FormSchema, FormField, FieldValidation } from './types';
+import { FormSchema, FormField } from './types';
 
 export const generateValidationSchema = (schema: FormSchema): z.ZodObject<any> => {
   const shape: Record<string, z.ZodTypeAny> = {};
@@ -14,131 +14,84 @@ export const generateValidationSchema = (schema: FormSchema): z.ZodObject<any> =
 const createFieldValidation = (field: FormField): z.ZodTypeAny => {
   const { required, validations = {}, type } = field;
   
-  // Start with base schema based on field type
   let baseSchema: z.ZodTypeAny;
   
   switch (type) {
     case 'text':
-    case 'textarea':
-      baseSchema = z.string();
+    case 'textarea': {
+      let schema = z.string();
+      if (validations.minLength !== undefined) {
+        schema = schema.min(validations.minLength, validations.customMessage || `Must be at least ${validations.minLength} characters`);
+      }
+      if (validations.maxLength !== undefined) {
+        schema = schema.max(validations.maxLength, validations.customMessage || `Must be at most ${validations.maxLength} characters`);
+      }
+      if (validations.pattern) {
+        schema = schema.regex(new RegExp(validations.pattern), validations.customMessage || 'Invalid format');
+      }
+      baseSchema = schema;
       break;
+    }
     case 'email':
       baseSchema = z.string().email(validations.customMessage || 'Invalid email address');
       break;
-    case 'number':
-      baseSchema = z.number().or(z.string().transform(val => {
-        const parsed = parseFloat(val);
-        if (isNaN(parsed)) return undefined;
-        return parsed;
-      }));
+    case 'number': {
+      let schema = z.number();
+      if (validations.min !== undefined) {
+        schema = schema.min(validations.min, validations.customMessage || `Must be at least ${validations.min}`);
+      }
+      if (validations.max !== undefined) {
+        schema = schema.max(validations.max, validations.customMessage || `Must be at most ${validations.max}`);
+      }
+      baseSchema = schema;
       break;
+    }
     case 'select':
     case 'radio':
       baseSchema = z.string();
       break;
     case 'multiSelect':
-    case 'checkbox':
-      baseSchema = z.array(z.string());
+    case 'checkbox': {
+      let schema = z.array(z.string());
+      if (validations.min !== undefined) {
+        schema = schema.min(validations.min, validations.customMessage || `Please select at least ${validations.min} options`);
+      }
+      if (validations.max !== undefined) {
+        schema = schema.max(validations.max, validations.customMessage || `Please select at most ${validations.max} options`);
+      }
+      baseSchema = schema;
       break;
+    }
     case 'date':
       baseSchema = z.string().or(z.date());
       break;
     case 'file':
-      baseSchema = z.any(); // File validations handled separately
+      baseSchema = z.any();
       break;
     case 'rating':
       baseSchema = z.number();
       break;
     case 'matrix':
-      baseSchema = z.record(z.string()); // Matrix is a record of row id to selected value
+      baseSchema = z.record(z.string());
       break;
     case 'repeatable':
-      // Repeatable should be an array of objects
       return z.array(z.any());
     default:
       baseSchema = z.any();
   }
 
-  // Apply common validations
-  let schema = applyCommonValidations(baseSchema, validations, type);
-  
   // Make optional if not required
   if (!required) {
     if (type === 'number') {
-      schema = schema.nullable().optional();
+      baseSchema = baseSchema.nullable().optional();
     } else if (['multiSelect', 'checkbox'].includes(type)) {
-      schema = schema.optional().default([]);
+      baseSchema = baseSchema.optional().default([]);
     } else if (type === 'matrix') {
-      schema = schema.optional().default({});
+      baseSchema = baseSchema.optional().default({});
     } else {
-      schema = schema.optional();
+      baseSchema = baseSchema.optional();
     }
   }
 
-  return schema;
-};
-
-const applyCommonValidations = (
-  schema: z.ZodTypeAny, 
-  validations: FieldValidation,
-  type: string
-): z.ZodTypeAny => {
-  let result = schema;
-
-  if (type === 'text' || type === 'textarea' || type === 'email') {
-    if (validations.minLength !== undefined) {
-      result = result.min(
-        validations.minLength,
-        validations.customMessage || `Must be at least ${validations.minLength} characters`
-      );
-    }
-    
-    if (validations.maxLength !== undefined) {
-      result = result.max(
-        validations.maxLength,
-        validations.customMessage || `Must be at most ${validations.maxLength} characters`
-      );
-    }
-    
-    if (validations.pattern) {
-      result = result.regex(
-        new RegExp(validations.pattern),
-        validations.customMessage || 'Invalid format'
-      );
-    }
-  }
-  
-  if (type === 'number') {
-    if (validations.min !== undefined) {
-      result = result.min(
-        validations.min,
-        validations.customMessage || `Must be at least ${validations.min}`
-      );
-    }
-    
-    if (validations.max !== undefined) {
-      result = result.max(
-        validations.max,
-        validations.customMessage || `Must be at most ${validations.max}`
-      );
-    }
-  }
-  
-  if (['multiSelect', 'checkbox'].includes(type)) {
-    if (validations.min !== undefined) {
-      result = result.min(
-        validations.min,
-        validations.customMessage || `Please select at least ${validations.min} options`
-      );
-    }
-    
-    if (validations.max !== undefined) {
-      result = result.max(
-        validations.max,
-        validations.customMessage || `Please select at most ${validations.max} options`
-      );
-    }
-  }
-
-  return result;
+  return baseSchema;
 };

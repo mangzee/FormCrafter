@@ -34,7 +34,7 @@ const FormBuilderDemo = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Form Builder Library</h1>
+        <h1 className="text-3xl font-bold">FormCrafter</h1>
         <div className="flex gap-2">
           <Button 
             variant="outline" 

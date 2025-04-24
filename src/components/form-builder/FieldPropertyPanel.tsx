@@ -38,7 +38,6 @@ const FieldPropertyPanel = ({
   onRemoveField,
   formFields 
 }: FieldPropertyPanelProps) => {
-  const [showSubFieldPanel, setShowSubFieldPanel] = useState(false);
   const [selectedSubField, setSelectedSubField] = useState<string | null>(null);
 
   const addSubField = (type: FieldType) => {
@@ -173,9 +172,9 @@ const FieldPropertyPanel = ({
             <div className="flex items-center justify-between">
               <Label>Sub Fields</Label>
               <Select
-                value={showSubFieldPanel ? "add" : ""}
+                value=""
                 onValueChange={(value) => {
-                  if (value !== "add") {
+                  if (value !== "") {
                     addSubField(value as FieldType);
                   }
                 }}
